@@ -1,0 +1,16 @@
+RewriteEngine On
+
+# Never expose code or SQL files directly
+RewriteRule ^(includes|pages|templates|database)/ - [F,L]
+
+# Serve files in /public as they are
+RewriteRule ^public/ - [L]
+
+# Everything else that is not a real file goes to the router
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ api/index.php [L]
+
+# Block hidden files (.env.local, .git) and config/SQL/markdown files
+<FilesMatch "^\.|\.(sql|json|md)$">
+    Require all denied
+</FilesMatch>
