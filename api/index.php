@@ -30,6 +30,40 @@ if (BASE_PATH !== '' && str_starts_with($path, BASE_PATH)) {
 }
 $path = '/' . trim($path, '/');
 
+// Serve files from public/assets ourselves (works on Vercel and XAMPP)
+if (str_starts_with($path, '/assets/')) {
+    $types = [
+        'css'   => 'text/css; charset=utf-8',
+        'js'    => 'application/javascript; charset=utf-8',
+        'png'   => 'image/png',
+        'jpg'   => 'image/jpeg',
+        'jpeg'  => 'image/jpeg',
+        'svg'   => 'image/svg+xml',
+        'ico'   => 'image/x-icon',
+        'woff2' => 'font/woff2',
+    ];
+
+    $assetsDir = realpath(ROOT . '/public/assets');
+    $file      = realpath(ROOT . '/public' . $path);
+    $ext       = $file ? strtolower(pathinfo($file, PATHINFO_EXTENSION)) : '';
+
+    // Only real files inside public/assets with an allowed type are served
+    if (
+        $file && $assetsDir
+        && str_starts_with($file, $assetsDir . DIRECTORY_SEPARATOR)
+        && is_file($file)
+        && isset($types[$ext])
+    ) {
+        header('Content-Type: ' . $types[$ext]);
+        header('Cache-Control: public, max-age=3600');
+        readfile($file);
+    } else {
+        http_response_code(404);
+        echo 'Not found';
+    }
+    exit;
+}
+
 try {
     start_session();
 
