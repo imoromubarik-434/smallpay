@@ -43,8 +43,8 @@ if (str_starts_with($path, '/assets/')) {
         'woff2' => 'font/woff2',
     ];
 
-    $assetsDir = realpath(ROOT . '/public/assets');
-    $file      = realpath(ROOT . '/public' . $path);
+    $assetsDir = realpath(ROOT . '/assets');
+    $file      = realpath(ROOT . $path);
     $ext       = $file ? strtolower(pathinfo($file, PATHINFO_EXTENSION)) : '';
 
     // Only real files inside public/assets with an allowed type are served

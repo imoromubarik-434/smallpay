@@ -13,10 +13,10 @@ function url(string $path = '/'): string
     return BASE_PATH . '/' . ltrim($path, '/');
 }
 
-/** Build a link to a file in public/assets. */
+/** Build a link to a file in the assets folder. */
 function asset(string $path): string
 {
-    return BASE_PATH . (IS_LOCAL ? '/public' : '') . '/assets/' . ltrim($path, '/');
+    return BASE_PATH . '/assets/' . ltrim($path, '/');
 }
 
 /** Redirect to another page and stop. */
