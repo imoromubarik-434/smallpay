@@ -17,6 +17,14 @@ if (!$employee) {
     not_found();
 }
 
+// Unpaid advance balance (shown as a warning before deactivating)
+$stmt = db()->prepare(
+    "SELECT COALESCE(SUM(balance), 0) FROM advance_balances
+     WHERE employee_id = :id AND status = 'approved'"
+);
+$stmt->execute(['id' => $id]);
+$outstanding = $stmt->fetchColumn();
+
 // Pay structure in force today
 $stmt = db()->prepare(
     'SELECT pay_type, rate FROM pay_structures
@@ -227,4 +235,37 @@ admin_header('Edit employee', 'employees');
         </table>
     </div>
 </section>
+
+<section class="card status-box">
+    <h2>Employment status</h2>
+
+    <?php if ($employee['status'] === 'active'): ?>
+        <p>
+            Inactive employees are left out of payroll runs and cannot log in.
+            Their payslip history is kept.
+        </p>
+        <?php if ((float)$outstanding > 0): ?>
+            <p class="notice">
+                This employee has an unpaid advance of <?= e(money($outstanding)) ?>.
+                It is not recovered while they are inactive.
+            </p>
+        <?php endif; ?>
+        <form method="post" action="<?= e(url('/admin/employees/status')) ?>"
+              data-confirm="Deactivate this employee? They will be left out of payroll and cannot log in.">
+            <?= csrf_field() ?>
+            <input type="hidden" name="id" value="<?= (int)$id ?>">
+            <input type="hidden" name="action" value="deactivate">
+            <button class="btn btn-danger" type="submit">Deactivate employee</button>
+        </form>
+    <?php else: ?>
+        <p>This employee is inactive. Reactivating puts them back into payroll and restores their login.</p>
+        <form method="post" action="<?= e(url('/admin/employees/status')) ?>">
+            <?= csrf_field() ?>
+            <input type="hidden" name="id" value="<?= (int)$id ?>">
+            <input type="hidden" name="action" value="reactivate">
+            <button class="btn" type="submit">Reactivate employee</button>
+        </form>
+    <?php endif; ?>
+</section>
+
 <?php admin_footer(); ?>
