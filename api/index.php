@@ -26,6 +26,7 @@ $routes = [
     '/admin'    => 'admin/dashboard',
     '/employee' => 'employee/dashboard',
     '/admin/employees' => 'admin_employees',
+    '/admin/employees/new' => 'admin_employee_new',
 ];
 
 // Work out which page was requested
