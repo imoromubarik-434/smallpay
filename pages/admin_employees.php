@@ -71,26 +71,30 @@ admin_header('Employees', 'employees');
     <div class="table-wrap">
         <table class="table">
             <thead>
-                <tr><th>No.</th><th>Name</th><th>Job title</th><th>Pay</th><th>Status</th></tr>
+                <tr><th>No.</th><th>Name</th><th>Job title</th><th>Pay</th><th>Status</th><th>Actions</th></tr>
             </thead>
             <tbody>
                 <?php foreach ($employees as $emp): ?>
-                    <tr>
-                        <td><?= e($emp['employee_number']) ?></td>
-                        <td><?= e($emp['first_name'] . ' ' . $emp['last_name']) ?></td>
-                        <td><?= e($emp['job_title'] ?? '') ?></td>
-                        <td>
-                            <?= $emp['pay_type']
-                                ? e(ucfirst($emp['pay_type']) . ' · ' . money($emp['rate']))
-                                : 'Not set' ?>
-                        </td>
-                        <td>
-                            <span class="chip <?= $emp['status'] === 'active' ? 'chip-green' : 'chip-gray' ?>">
-                                <?= e(ucfirst($emp['status'])) ?>
-                            </span>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
+    <tr>
+        <td><?= e($emp['employee_number']) ?></td>
+        <td><?= e($emp['first_name'] . ' ' . $emp['last_name']) ?></td>
+        <td><?= e($emp['job_title'] ?? '') ?></td>
+        <td>
+            <?= $emp['pay_type']
+                ? e(ucfirst($emp['pay_type']) . ' · ' . money($emp['rate']))
+                : 'Not set' ?>
+        </td>
+        <td>
+            <span class="chip <?= $emp['status'] === 'active' ? 'chip-green' : 'chip-gray' ?>">
+                <?= e(ucfirst($emp['status'])) ?>
+            </span>
+        </td>
+        <td>
+            <a href="<?= e(url('/admin/employees/edit') . '?id=' . (int)$emp['id']) ?>"
+               aria-label="Edit <?= e($emp['first_name'] . ' ' . $emp['last_name']) ?>">Edit</a>
+        </td>
+    </tr>
+<?php endforeach; ?>
             </tbody>
         </table>
     </div>
