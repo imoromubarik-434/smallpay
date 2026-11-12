@@ -22,7 +22,7 @@ $last = db()->query(
      LIMIT 1"
 )->fetch();
 
-page_header('Admin dashboard');
+admin_header('Dashboard', 'dashboard');
 ?>
 <h1>Admin dashboard</h1>
 <p>Signed in as <?= e($user['email']) ?></p>
@@ -45,4 +45,4 @@ page_header('Admin dashboard');
         <div class="stat-value"><?= $unpaidPayslips ?></div>
     </div>
 </div>
-<?php page_footer(); ?>
+<?php admin_footer(); ?>
