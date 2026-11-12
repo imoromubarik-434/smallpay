@@ -57,9 +57,22 @@ if (str_starts_with($path, '/assets/')) {
         header('Content-Type: ' . $types[$ext]);
         header('Cache-Control: public, max-age=3600');
         readfile($file);
-    } else {
+    }     } else {
         http_response_code(404);
-        echo 'Not found';
+        header('Content-Type: text/plain; charset=utf-8');
+        echo "Not found\n";
+
+        // TEMPORARY debugging: remove once the CSS loads
+        if (env('APP_DEBUG') === '1') {
+            echo 'ROOT: ' . ROOT . "\n";
+            echo 'path: ' . $path . "\n";
+            echo 'file: ' . var_export($file, true) . "\n\n";
+            echo "Items in ROOT:\n" . implode("\n", scandir(ROOT)) . "\n\n";
+            echo "Items in ROOT/assets:\n";
+            echo is_dir(ROOT . '/assets')
+                ? implode("\n", scandir(ROOT . '/assets'))
+                : '(no assets folder)';
+        }
     }
     exit;
 }
