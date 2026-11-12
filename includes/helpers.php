@@ -132,3 +132,17 @@ function field(string $name, string $label, string $value, array $errors, string
         . '<p class="field-error" aria-live="polite">' . e($errors[$name] ?? '') . '</p>'
         . '</div>';
 }
+
+/** A random password without look-alike characters (no 0/O, 1/l/I). */
+function random_password(int $length = 12): string
+{
+    $alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+    $max      = strlen($alphabet) - 1;
+    $password = '';
+
+    for ($i = 0; $i < $length; $i++) {
+        $password .= $alphabet[random_int(0, $max)];   // cryptographically secure
+    }
+
+    return $password;
+}
