@@ -47,8 +47,8 @@ admin_header('Employees', 'employees');
         <h1>Employees</h1>
         <p><?= count($employees) ?> shown</p>
     </div>
+    <a class="btn" href="<?= e(url('/admin/employees/new')) ?>">Add employee</a>
 </div>
-
 <form class="toolbar" method="get" action="<?= e(url('/admin/employees')) ?>">
     <div class="form-group">
         <label for="q">Search</label>
