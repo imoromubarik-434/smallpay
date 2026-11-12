@@ -83,3 +83,15 @@ function page_footer(): void
 {
     require ROOT . '/templates/footer.php';
 }
+
+/** Print the top of an admin page (sidebar layout). $active highlights a menu item. */
+function admin_header(string $pageTitle, string $active = ''): void
+{
+    require ROOT . '/templates/admin_header.php';
+}
+
+/** Print the bottom of an admin page. */
+function admin_footer(): void
+{
+    require ROOT . '/templates/admin_footer.php';
+}
