@@ -95,3 +95,9 @@ function admin_footer(): void
 {
     require ROOT . '/templates/admin_footer.php';
 }
+
+/** Marks a form field as invalid for screen readers when it has an error. */
+function invalid_attr(array $errors, string $key): string
+{
+    return isset($errors[$key]) ? ' aria-invalid="true"' : '';
+}
