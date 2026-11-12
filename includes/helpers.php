@@ -101,3 +101,34 @@ function invalid_attr(array $errors, string $key): string
 {
     return isset($errors[$key]) ? ' aria-invalid="true"' : '';
 }
+
+/** Show the 404 page and stop. */
+function not_found(): never
+{
+    http_response_code(404);
+    require ROOT . '/pages/404.php';
+    exit;
+}
+
+/** Parse a YYYY-MM-DD date strictly; returns null if it is not a real date. */
+function parse_date(string $value): ?DateTime
+{
+    $date = DateTime::createFromFormat('!Y-m-d', $value);
+    return ($date && $date->format('Y-m-d') === $value) ? $date : null;
+}
+
+/**
+ * Print a labelled input with its error message.
+ * $attrs is raw HTML written by us in the page (never user input).
+ */
+function field(string $name, string $label, string $value, array $errors, string $type = 'text', string $attrs = ''): void
+{
+    $invalid = isset($errors[$name]) ? ' aria-invalid="true"' : '';
+
+    echo '<div class="form-group">'
+        . '<label for="' . e($name) . '">' . e($label) . '</label>'
+        . '<input type="' . e($type) . '" id="' . e($name) . '" name="' . e($name) . '"'
+        . ' value="' . e($value) . '"' . $invalid . ' ' . $attrs . '>'
+        . '<p class="field-error" aria-live="polite">' . e($errors[$name] ?? '') . '</p>'
+        . '</div>';
+}
