@@ -7,10 +7,10 @@ require ROOT . '/includes/env.php';
 require ROOT . '/includes/db.php';
 require ROOT . '/includes/helpers.php';
 require ROOT . '/includes/session.php';
+require ROOT . '/includes/auth.php';
 
 // Folder the app lives in: empty on Vercel, "/smallpay" on XAMPP
 define('BASE_PATH', rtrim(env('APP_BASE_PATH'), '/'));
-define('IS_LOCAL', env('APP_ENV') === 'local');
 
 // Basic security headers
 header('X-Content-Type-Options: nosniff');
@@ -19,8 +19,12 @@ header('Referrer-Policy: strict-origin-when-cross-origin');
 
 // Whitelist: only these pages can ever be loaded
 $routes = [
-    '/'       => 'home',
-    '/health' => 'health',
+    '/'         => 'home',
+    '/health'   => 'health',
+    '/login'    => 'login',
+    '/logout'   => 'logout',
+    '/admin'    => 'admin/dashboard',
+    '/employee' => 'employee/dashboard',
 ];
 
 // Work out which page was requested
@@ -30,7 +34,7 @@ if (BASE_PATH !== '' && str_starts_with($path, BASE_PATH)) {
 }
 $path = '/' . trim($path, '/');
 
-// Serve files from public/assets ourselves (works on Vercel and XAMPP)
+// Serve files from /assets ourselves (works on Vercel and XAMPP)
 if (str_starts_with($path, '/assets/')) {
     $types = [
         'css'   => 'text/css; charset=utf-8',
@@ -47,7 +51,7 @@ if (str_starts_with($path, '/assets/')) {
     $file      = realpath(ROOT . $path);
     $ext       = $file ? strtolower(pathinfo($file, PATHINFO_EXTENSION)) : '';
 
-    // Only real files inside public/assets with an allowed type are served
+    // Only real files inside /assets with an allowed type are served
     if (
         $file && $assetsDir
         && str_starts_with($file, $assetsDir . DIRECTORY_SEPARATOR)
@@ -57,25 +61,16 @@ if (str_starts_with($path, '/assets/')) {
         header('Content-Type: ' . $types[$ext]);
         header('Cache-Control: public, max-age=3600');
         readfile($file);
-    }     } else {
+    } else {
         http_response_code(404);
         header('Content-Type: text/plain; charset=utf-8');
-        echo "Not found\n";
-
-        // TEMPORARY debugging: remove once the CSS loads
-        if (env('APP_DEBUG') === '1') {
-            echo 'ROOT: ' . ROOT . "\n";
-            echo 'path: ' . $path . "\n";
-            echo 'file: ' . var_export($file, true) . "\n\n";
-            echo "Items in ROOT:\n" . implode("\n", scandir(ROOT)) . "\n\n";
-            echo "Items in ROOT/assets:\n";
-            echo is_dir(ROOT . '/assets')
-                ? implode("\n", scandir(ROOT . '/assets'))
-                : '(no assets folder)';
-        }
+        echo 'Not found';
     }
     exit;
 }
+
+// Dynamic pages must never be cached (protects pages after logout)
+header('Cache-Control: no-store');
 
 try {
     start_session();
