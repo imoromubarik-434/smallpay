@@ -30,6 +30,7 @@ $routes = [
     '/admin/employees/edit' => 'admin_employee_edit',
     '/admin/employees/status' => 'admin_employee_status',
     '/admin/employees/account' => 'admin_employee_account',
+    '/account/password' => 'account_password',
 ];
 
 // Work out which page was requested
