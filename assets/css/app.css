@@ -190,3 +190,18 @@ input[type="tel"] {
 }
 .status-box { margin-top: 1.5rem; }
 .status-box h2 { margin-top: 0; }
+
+.account-box { margin-top: 1.5rem; }
+.account-box h2 { margin-top: 0; }
+
+.credentials { display: grid; grid-template-columns: max-content 1fr; gap: 0.5rem 1rem; margin: 1rem 0; }
+.credentials dt { font-weight: 600; }
+.credentials dd { margin: 0; }
+.credentials code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 1.25rem;
+    letter-spacing: 0.05em;
+    background: #f1f5f9;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+}
