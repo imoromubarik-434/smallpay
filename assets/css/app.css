@@ -66,3 +66,55 @@ main.container { padding: 2rem 0; min-height: 60vh; }
     font-size: 0.9rem;
     text-align: center;
 }
+
+/* Cards and forms */
+.card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+.auth-card { max-width: 420px; margin: 2rem auto; }
+
+.form-group { margin-bottom: 1rem; }
+label { display: block; font-weight: 600; margin-bottom: 0.35rem; }
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+select {
+    width: 100%;
+    min-height: 44px;
+    padding: 0.65rem 0.8rem;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--radius);
+    font: inherit;
+}
+input[aria-invalid="true"] { border-color: #b91c1c; }
+
+input:focus-visible,
+button:focus-visible,
+a:focus-visible { outline: 3px solid #99f6e4; outline-offset: 2px; }
+
+.field-error { color: #b91c1c; font-size: 0.875rem; margin: 0.3rem 0 0; min-height: 1.2em; }
+.btn-block { width: 100%; }
+
+/* Log out button that looks like a nav link */
+.inline-form { display: inline; margin: 0; }
+.link-button {
+    background: none;
+    border: 0;
+    padding: 0;
+    margin-left: 1rem;
+    font: inherit;
+    color: var(--text);
+    cursor: pointer;
+}
+.link-button:hover { color: var(--brand); }
+
+/* Dashboard summary cards */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+.stat { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
+.stat-label { color: var(--muted); font-size: 0.875rem; }
+.stat-value { font-size: 2rem; font-weight: 700; }
