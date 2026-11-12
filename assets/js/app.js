@@ -28,4 +28,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+        // Ask before a risky action: <form data-confirm="Are you sure?">
+    document.querySelectorAll('form[data-confirm]').forEach((form) => {
+        form.addEventListener('submit', (event) => {
+            if (!window.confirm(form.dataset.confirm)) {
+                event.preventDefault();
+            }
+        });
+    });
 });
