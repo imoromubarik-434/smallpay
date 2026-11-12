@@ -4,14 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($pageTitle) ?> | SmallPay</title>
+    <link rel="icon" href="data:,">
     <link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>">
 </head>
 <body>
+<?php $navUser = current_user(); ?>
 <header class="site-header">
     <div class="container nav">
         <a class="brand" href="<?= e(url('/')) ?>">SmallPay</a>
         <nav aria-label="Main">
             <a href="<?= e(url('/')) ?>">Home</a>
+            <?php if ($navUser !== null): ?>
+                <a href="<?= e(url(home_for_role($navUser['role']))) ?>">Dashboard</a>
+                <form method="post" action="<?= e(url('/logout')) ?>" class="inline-form">
+                    <?= csrf_field() ?>
+                    <button type="submit" class="link-button">Log out</button>
+                </form>
+            <?php else: ?>
+                <a href="<?= e(url('/login')) ?>">Log in</a>
+            <?php endif; ?>
         </nav>
     </div>
 </header>
