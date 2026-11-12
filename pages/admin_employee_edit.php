@@ -8,13 +8,21 @@ if ($id === false) {
 }
 
 $stmt = db()->prepare(
-    'SELECT id, employee_number, first_name, last_name, phone, job_title, hire_date, status
+    'SELECT id, employee_number, first_name, last_name, phone, job_title, hire_date, status, user_id
      FROM employees WHERE id = :id'
 );
 $stmt->execute(['id' => $id]);
 $employee = $stmt->fetch();
 if (!$employee) {
     not_found();
+}
+
+// Login account, if the employee has one
+$account = null;
+if ($employee['user_id'] !== null) {
+    $stmt = db()->prepare('SELECT email, is_active, last_login_at FROM users WHERE id = :uid');
+    $stmt->execute(['uid' => $employee['user_id']]);
+    $account = $stmt->fetch() ?: null;
 }
 
 // Unpaid advance balance (shown as a warning before deactivating)
@@ -234,6 +242,30 @@ admin_header('Edit employee', 'employees');
             </tbody>
         </table>
     </div>
+</section>
+
+<section class="card account-box">
+    <h2>Login account</h2>
+
+    <?php if ($account): ?>
+        <p>Login email: <strong><?= e($account['email']) ?></strong></p>
+        <p>Last login:
+            <?= $account['last_login_at'] ? e(substr($account['last_login_at'], 0, 16)) . ' UTC' : 'Never' ?>
+        </p>
+    <?php elseif ($employee['status'] === 'active'): ?>
+        <p>
+            This employee cannot log in yet. Enter their email address and a temporary
+            password will be generated and shown once.
+        </p>
+        <form method="post" action="<?= e(url('/admin/employees/account')) ?>" data-validate novalidate>
+            <?= csrf_field() ?>
+            <input type="hidden" name="id" value="<?= (int)$id ?>">
+            <?php field('email', 'Login email', '', [], 'email', 'maxlength="255" required autocomplete="off"'); ?>
+            <button class="btn" type="submit">Create login</button>
+        </form>
+    <?php else: ?>
+        <p>Reactivate this employee to create a login.</p>
+    <?php endif; ?>
 </section>
 
 <section class="card status-box">
