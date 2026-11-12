@@ -54,6 +54,7 @@ function current_user(): ?array
         'role'        => $row['role'],          // always taken from the database
         'employee_id' => $session['employee_id'] ?? null,
         'name'        => $session['name'] ?? $row['email'],
+        'must_change' => in_array($row['must_change_password'], [true, 't', 1, '1'], true),
     ];
 
     return $user;
@@ -66,7 +67,8 @@ function home_for_role(string $role): string
 }
 
 /** Block the page unless someone is logged in. */
-function require_login(): array
+/** Block the page unless someone is logged in (and has no password change pending). */
+function require_login(bool $allowPasswordChange = false): array
 {
     $user = current_user();
 
@@ -75,9 +77,13 @@ function require_login(): array
         redirect('/login');
     }
 
+    if ($user['must_change'] && !$allowPasswordChange) {
+        flash('info', 'Please choose a new password to continue.');
+        redirect('/account/password');
+    }
+
     return $user;
 }
-
 /** Block the page unless the logged-in user has this role. */
 function require_role(string $role): array
 {
@@ -111,7 +117,9 @@ function login_user(array $user): void
     ];
     unset($_SESSION['csrf']);      // fresh CSRF token after login
 
-    $stmt = db()->prepare('UPDATE users SET last_login_at = NOW() WHERE id = :id');
+        $stmt = db()->prepare(
+        'SELECT id, email, role, is_active, must_change_password FROM users WHERE id = :id'
+    );
     $stmt->execute(['id' => $user['id']]);
 }
 
