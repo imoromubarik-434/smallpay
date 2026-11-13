@@ -6,6 +6,7 @@ $items = [
     ['payroll',   'Payroll runs', '/admin/payroll',   false],
     ['advances',  'Advances',     '/admin/advances',  false],
     ['reports',   'Reports',      '/admin/reports',   false],
+    ['password',  'Change password', '/account/password', true],
 ];
 
 require __DIR__ . '/head.php';
