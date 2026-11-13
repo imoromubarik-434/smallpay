@@ -6,6 +6,7 @@
             <a href="<?= e(url('/')) ?>">Home</a>
             <?php if ($navUser !== null): ?>
                 <a href="<?= e(url(home_for_role($navUser['role']))) ?>">Dashboard</a>
+                 <a href="<?= e(url('/account/password')) ?>">Password</a>
                 <form method="post" action="<?= e(url('/logout')) ?>" class="inline-form">
                     <?= csrf_field() ?>
                     <button type="submit" class="link-button">Log out</button>
