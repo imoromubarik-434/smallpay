@@ -2,7 +2,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // Success and info messages disappear by themselves (errors stay)
     document.querySelectorAll('.alert-success, .alert-info').forEach((box) => {
         setTimeout(() => box.remove(), 6000);
+            // Show a block only when another field has a given value:
+    // <div data-show-if="method=percentage">
+    document.querySelectorAll('[data-show-if]').forEach((box) => {
+        const [name, value] = box.dataset.showIf.split('=');
+        const inputs = document.querySelectorAll('[name="' + name + '"]');
+
+        const update = () => {
+            let current = '';
+            inputs.forEach((input) => {
+                if (input.type !== 'radio' || input.checked) {
+                    current = input.value;
+                }
+            });
+            box.hidden = current !== value;
+        };
+
+        inputs.forEach((input) => input.addEventListener('change', update));
+        update();
     });
+ });
 
     // Client-side validation for any form marked with data-validate
     document.querySelectorAll('form[data-validate]').forEach((form) => {
