@@ -33,6 +33,8 @@ $routes = [
     '/account/password' => 'account_password',
     '/admin/rules'        => 'admin_rules',
     '/admin/rules/toggle' => 'admin_rule_toggle',
+    '/admin/rules/new'  => 'admin_rule_form',
+    '/admin/rules/edit' => 'admin_rule_form',
 ];
 
 // Work out which page was requested
