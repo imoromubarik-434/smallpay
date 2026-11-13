@@ -146,3 +146,29 @@ function random_password(int $length = 12): string
 
     return $password;
 }
+
+/** True for a PostgreSQL boolean however the driver returns it. */
+function truthy(mixed $value): bool
+{
+    return in_array($value, [true, 't', 'true', 1, '1'], true);
+}
+
+/**
+ * Print a labelled dropdown with its error message.
+ * $options is [value => text]. $attrs is raw HTML written by us (never user input).
+ */
+function select_field(string $name, string $label, array $options, string $selected, array $errors, string $attrs = ''): void
+{
+    $invalid = isset($errors[$name]) ? ' aria-invalid="true"' : '';
+
+    echo '<div class="form-group">'
+        . '<label for="' . e($name) . '">' . e($label) . '</label>'
+        . '<select id="' . e($name) . '" name="' . e($name) . '"' . $invalid . ' ' . $attrs . '>';
+
+    foreach ($options as $value => $text) {
+        echo '<option value="' . e((string)$value) . '"'
+            . ((string)$value === $selected ? ' selected' : '') . '>' . e($text) . '</option>';
+    }
+
+    echo '</select><p class="field-error" aria-live="polite">' . e($errors[$name] ?? '') . '</p></div>';
+}
