@@ -31,6 +31,8 @@ $routes = [
     '/admin/employees/status' => 'admin_employee_status',
     '/admin/employees/account' => 'admin_employee_account',
     '/account/password' => 'account_password',
+    '/admin/rules'        => 'admin_rules',
+    '/admin/rules/toggle' => 'admin_rule_toggle',
 ];
 
 // Work out which page was requested
