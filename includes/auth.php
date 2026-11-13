@@ -39,7 +39,9 @@ function current_user(): ?array
         return null;
     }
 
-    $stmt = db()->prepare('SELECT id, email, role, is_active FROM users WHERE id = :id');
+    $stmt = db()->prepare(
+        'SELECT id, email, role, is_active, must_change_password FROM users WHERE id = :id'
+    );
     $stmt->execute(['id' => $session['id']]);
     $row = $stmt->fetch();
 
