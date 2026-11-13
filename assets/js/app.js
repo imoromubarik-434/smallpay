@@ -7,6 +7,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Client-side validation for any form marked with data-validate
     document.querySelectorAll('form[data-validate]').forEach((form) => {
         form.addEventListener('submit', (event) => {
+                        // Fields marked data-match must equal the field they name
+            form.querySelectorAll('input[data-match]').forEach((field) => {
+                const other = form.querySelector('#' + field.dataset.match);
+                field.setCustomValidity(
+                    other && field.value !== other.value ? 'The passwords do not match.' : ''
+                );
+            });
             let firstInvalid = null;
 
             form.querySelectorAll('input, select, textarea').forEach((field) => {
