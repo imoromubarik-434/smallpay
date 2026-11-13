@@ -2,7 +2,7 @@
 $items = [
     ['dashboard', 'Dashboard',    '/admin',           true],
     ['employees', 'Employees',    '/admin/employees', true],
-    ['rules',     'Pay rules',    '/admin/rules',     false],
+    ['rules',     'Pay rules',    '/admin/rules',     true],
     ['payroll',   'Payroll runs', '/admin/payroll',   false],
     ['advances',  'Advances',     '/admin/advances',  false],
     ['reports',   'Reports',      '/admin/reports',   false],
