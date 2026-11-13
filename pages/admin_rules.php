@@ -18,6 +18,7 @@ admin_header('Pay rules', 'rules');
         <h1>Pay rules</h1>
         <p>Allowances add to pay. Deductions are taken from it.</p>
     </div>
+    <a class="btn" href="<?= e(url('/admin/rules/new')) ?>">Add rule</a>
 </div>
 
 <p class="hint">
@@ -58,20 +59,20 @@ admin_header('Pay rules', 'rules');
                             </span>
                         </td>
                         <td>
-                            <form method="post" action="<?= e(url('/admin/rules/toggle')) ?>" class="inline-form">
-                                <?= csrf_field() ?>
-                                <input type="hidden" name="id" value="<?= (int)$rule['id'] ?>">
-                                <input type="hidden" name="action" value="<?= $on ? 'off' : 'on' ?>">
-                                <button type="submit" class="link-button table-action"
-                                        aria-label="Turn <?= $on ? 'off' : 'on' ?> <?= e($rule['name']) ?>">
-                                    Turn <?= $on ? 'off' : 'on' ?>
-                                </button>
-                            </form>
+                            <div class="row-actions">
+                                <a href="<?= e(url('/admin/rules/edit') . '?id=' . (int)$rule['id']) ?>"
+                                   aria-label="Edit <?= e($rule['name']) ?>">Edit</a>
+
+                                <form method="post" action="<?= e(url('/admin/rules/toggle')) ?>" class="inline-form">
+                                    <?= csrf_field() ?>
+                                    <input type="hidden" name="id" value="<?= (int)$rule['id'] ?>">
+                                    <input type="hidden" name="action" value="<?= $on ? 'off' : 'on' ?>">
+                                    <button type="submit" class="link-button table-action"
+                                            aria-label="Turn <?= $on ? 'off' : 'on' ?> <?= e($rule['name']) ?>">
+                                        Turn <?= $on ? 'off' : 'on' ?>
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-<?php endif; ?>
-<?php admin_footer(); ?>
