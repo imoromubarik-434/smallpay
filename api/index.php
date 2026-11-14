@@ -91,8 +91,11 @@ try {
     }
 
     require ROOT . '/pages/' . $page . '.php';
+    
 } catch (Throwable $e) {
     error_log($e->getMessage());
     http_response_code(500);
-    echo '<pre>' . e($e->getMessage()) . ' (' . e(basename($e->getFile())) . ', line ' . $e->getLine() . ')</pre>';
+    echo env('APP_DEBUG') === '1'
+        ? '<pre>' . e($e->getMessage()) . '</pre>'
+        : 'Something went wrong. Please try again later.';
 }
