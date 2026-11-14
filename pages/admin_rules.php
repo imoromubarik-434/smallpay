@@ -76,3 +76,8 @@ admin_header('Pay rules', 'rules');
                         </td>
                     </tr>
                 <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+<?php endif; ?>
+<?php admin_footer(); ?>
