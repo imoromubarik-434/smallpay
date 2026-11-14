@@ -35,6 +35,8 @@ $routes = [
     '/admin/rules/toggle' => 'admin_rule_toggle',
     '/admin/rules/new'  => 'admin_rule_form',
     '/admin/rules/edit' => 'admin_rule_form',
+    '/admin/payroll'       => 'admin_payroll',
+    '/admin/payroll/start' => 'admin_payroll_start',
 ];
 
 // Work out which page was requested
