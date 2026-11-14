@@ -172,3 +172,10 @@ function select_field(string $name, string $label, array $options, string $selec
 
     echo '</select><p class="field-error" aria-live="polite">' . e($errors[$name] ?? '') . '</p></div>';
 }
+
+/** "November 2026" from a year and a month number. */
+function period_label(int $year, int $month): string
+{
+    $date = DateTime::createFromFormat('!Y-n', $year . '-' . $month);
+    return $date ? $date->format('F Y') : $year . '-' . $month;
+}
