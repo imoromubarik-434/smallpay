@@ -3,7 +3,7 @@ $items = [
     ['dashboard', 'Dashboard',    '/admin',           true],
     ['employees', 'Employees',    '/admin/employees', true],
     ['rules',     'Pay rules',    '/admin/rules',     true],
-    ['payroll',   'Payroll runs', '/admin/payroll',   false],
+    ['payroll',   'Payroll runs', '/admin/payroll',   true],
     ['advances',  'Advances',     '/admin/advances',  false],
     ['reports',   'Reports',      '/admin/reports',   false],
     ['password',  'Change password', '/account/password', true],
