@@ -4,7 +4,9 @@ $user = require_role('admin');
 // No user input in this query, so no parameters are needed
 $runs = db()->query(
     'SELECT r.id, r.period_year, r.period_month, r.status,
-            COUNT(p.id) AS staff, COALESCE(SUM(p.net_pay), 0) AS net_total
+            COUNT(p.id) AS staff,
+            COUNT(p.calculated_at) AS calculated,
+            COALESCE(SUM(p.net_pay), 0) AS net_total
      FROM payroll_runs r
      LEFT JOIN payslips p ON p.run_id = r.id
      GROUP BY r.id
@@ -50,16 +52,31 @@ admin_header('Payroll runs', 'payroll');
     <div class="table-wrap">
         <table class="table">
             <thead>
-                <tr><th>Period</th><th>Employees</th><th>Net total</th><th>Status</th><th>Actions</th></tr>
+                <tr>
+                    <th>Period</th><th>Employees</th><th class="num">Net total</th>
+                    <th>Status</th><th>Actions</th>
+                </tr>
             </thead>
             <tbody>
                 <?php foreach ($runs as $run): ?>
-                    <?php $final = $run['status'] === 'finalized'; ?>
-                    <?php $runLabel = period_label((int)$run['period_year'], (int)$run['period_month']); ?>
+                    <?php
+                    $final    = $run['status'] === 'finalized';
+                    $staff    = (int)$run['staff'];
+                    $done     = (int)$run['calculated'];
+                    $runLabel = period_label((int)$run['period_year'], (int)$run['period_month']);
+                    ?>
                     <tr>
                         <td><?= e($runLabel) ?></td>
-                        <td><?= (int)$run['staff'] ?></td>
-                        <td><?= $final ? e(money($run['net_total'])) : 'Not calculated' ?></td>
+                        <td><?= $staff ?></td>
+                        <td class="num">
+                            <?php if ($staff > 0 && $done === $staff): ?>
+                                <?= e(money($run['net_total'])) ?>
+                            <?php elseif ($done > 0): ?>
+                                <span class="muted">Partly calculated</span>
+                            <?php else: ?>
+                                <span class="muted">Not calculated</span>
+                            <?php endif; ?>
+                        </td>
                         <td>
                             <span class="chip <?= $final ? 'chip-green' : 'chip-amber' ?>">
                                 <?= $final ? 'Finalized' : 'Draft' ?>
