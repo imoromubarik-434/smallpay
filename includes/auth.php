@@ -131,3 +131,28 @@ function logout_user(): void
     unset($_SESSION['user'], $_SESSION['csrf']);
     session_regenerate_id(true);
 }
+
+/**
+ * For employee pages: the logged-in employee user and their employee record.
+ * The record is looked up from the database on every request.
+ */
+function require_employee(): array
+{
+    $user = require_role('employee');
+
+    $stmt = db()->prepare(
+        'SELECT id, employee_number, first_name, last_name FROM employees WHERE user_id = :uid'
+    );
+    $stmt->execute(['uid' => $user['id']]);
+    $employee = $stmt->fetch();
+
+    if (!$employee) {
+        page_header('No employee record');
+        echo '<h1>No employee record</h1>';
+        echo '<p>Your login is not linked to an employee record yet. Please ask your administrator.</p>';
+        page_footer();
+        exit;
+    }
+
+    return ['user' => $user, 'employee' => $employee];
+}
