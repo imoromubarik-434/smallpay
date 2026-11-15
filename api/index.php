@@ -45,6 +45,9 @@ $routes = [
     '/admin/payslip/pay' => 'admin_payslip_pay',
     '/employee/payslips' => 'employee_payslips',
     '/employee/payslip'  => 'employee_payslip',
+    '/employee/advances'     => 'employee_advances',
+    '/admin/advances'        => 'admin_advances',
+    '/admin/advances/decide' => 'admin_advance_decide',
 ];
 
 // Work out which page was requested
