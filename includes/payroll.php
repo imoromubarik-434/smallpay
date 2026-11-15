@@ -113,3 +113,41 @@ function calculate_payslip(array $slip, array $rules, array $assigned, int $year
         'items'      => $items,
     ];
 }
+
+/** Calculate every payslip of a run with the rules as they are right now. */
+function compute_run(PDO $pdo, int $runId, int $year, int $month): array
+{
+    $stmt = $pdo->prepare(
+        'SELECT p.id, p.employee_id, p.pay_type, p.rate, p.units_worked,
+                e.first_name, e.last_name, e.hire_date
+         FROM payslips p
+         JOIN employees e ON e.id = p.employee_id
+         WHERE p.run_id = :run
+         ORDER BY e.employee_number'
+    );
+    $stmt->execute(['run' => $runId]);
+    $slips = $stmt->fetchAll();
+
+    $rules = $pdo->query(
+        'SELECT id, name, rule_type, method, value, percentage_base, applies_to_all
+         FROM deduction_rules WHERE is_active ORDER BY rule_type, name'
+    )->fetchAll();
+
+    $assigned = [];
+    foreach ($pdo->query('SELECT rule_id, employee_id FROM employee_rules')->fetchAll() as $row) {
+        $assigned[(int)$row['rule_id']][(int)$row['employee_id']] = true;
+    }
+
+    $results  = [];
+    $problems = [];
+    foreach ($slips as $slip) {
+        $r = calculate_payslip($slip, $rules, $assigned, $year, $month);
+        if (isset($r['error'])) {
+            $problems[] = $r['error'];
+        } else {
+            $results[(int)$slip['id']] = $r;
+        }
+    }
+
+    return ['count' => count($slips), 'results' => $results, 'problems' => $problems];
+}
