@@ -8,6 +8,7 @@
                 <a href="<?= e(url(home_for_role($navUser['role']))) ?>">Dashboard</a>
                 <?php if ($navUser['role'] === 'employee'): ?>
                     <a href="<?= e(url('/employee/payslips')) ?>">My payslips</a>
+                    <a href="<?= e(url('/employee/advances')) ?>">Advances</a>
                 <?php endif; ?>
                  <a href="<?= e(url('/account/password')) ?>">Password</a>
                 <form method="post" action="<?= e(url('/logout')) ?>" class="inline-form">
