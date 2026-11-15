@@ -42,6 +42,7 @@ $routes = [
     '/admin/payroll/calculate' => 'admin_payroll_calculate',
     '/admin/payroll/finalize' => 'admin_payroll_finalize',
     '/admin/payslip' => 'admin_payslip',
+    '/admin/payslip/pay' => 'admin_payslip_pay',
 ];
 
 // Work out which page was requested
