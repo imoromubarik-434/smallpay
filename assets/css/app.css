@@ -252,3 +252,33 @@ input.units-input { width: 7rem; }
 .table .form-group { margin: 0; }
 .table .field-error { min-height: 0; }
 .num { text-align: right !important; font-variant-numeric: tabular-nums; }
+
+/* Payslip */
+.payslip { max-width: 720px; }
+.payslip-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    border-bottom: 2px solid var(--brand);
+    padding-bottom: 0.75rem;
+    margin-bottom: 1rem;
+}
+.payslip-brand { font-size: 1.4rem; color: var(--brand); }
+.payslip-meta { display: grid; grid-template-columns: max-content 1fr; gap: 0.35rem 1.5rem; margin: 0 0 1rem; }
+.payslip-meta dt { font-weight: 600; color: var(--muted); }
+.payslip-meta dd { margin: 0; }
+.payslip-table tr.section th { background: #f1f5f9; }
+.payslip-table tr.total td { font-weight: 700; border-top: 2px solid var(--border); }
+.payslip-table tr.net td { font-size: 1.25rem; color: var(--brand); }
+.payslip-foot { margin-top: 1rem; color: var(--muted); font-size: 0.875rem; }
+
+/* Printing: only the payslip */
+@media print {
+    .admin-sidebar, .no-print, .site-header, .site-footer { display: none !important; }
+    body { background: #fff; }
+    .admin-main { padding: 0; }
+    .card { border: 0; padding: 0; }
+    .payslip { max-width: none; }
+}
