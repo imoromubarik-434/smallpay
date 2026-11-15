@@ -164,7 +164,7 @@ admin_header('Payroll ' . $label, 'payroll');
                 <tr>
                     <th>No.</th><th>Name</th><th>Pay type</th><th class="num">Rate</th><th>Worked</th>
                     <th class="num">Basic</th><th class="num">Gross</th>
-                    <th class="num">Deductions</th><th class="num">Net</th>
+                    <th class="num">Deductions</th><th class="num">Net</th><th>Payslip</th>
                 </tr>
             </thead>
             <tbody>
@@ -204,6 +204,14 @@ admin_header('Payroll ' . $label, 'payroll');
                         <td class="num"><?= $calc ? e(money($s['gross_pay'])) : '-' ?></td>
                         <td class="num"><?= $calc ? e(money($s['total_deductions'])) : '-' ?></td>
                         <td class="num"><strong><?= $calc ? e(money($s['net_pay'])) : '-' ?></strong></td>
+                         <td>
+                            <?php if ($calc): ?>
+                                <a href="<?= e(url('/admin/payslip') . '?id=' . $sid) ?>"
+                                   aria-label="Payslip for <?= e($name) ?>">View</a>
+                            <?php else: ?>
+                                <span class="muted">-</span>
+                            <?php endif; ?>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
