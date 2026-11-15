@@ -168,4 +168,39 @@ $paid    = $slip['payment_status'] === 'paid';
         <br>Printed on <?= e(date('j F Y')) ?>
     </p>
 </article>
+
+<?php if ($finalized): ?>
+    <section class="card status-box no-print">
+        <h2>Payment</h2>
+
+        <?php if ($paid): ?>
+            <p>
+                Paid<?= $slip['payment_method'] ? ' by ' . e($methods[$slip['payment_method']] ?? $slip['payment_method']) : '' ?>
+                <?= $slip['paid_at'] ? ' on ' . e(substr($slip['paid_at'], 0, 10)) : '' ?>.
+            </p>
+            <form method="post" action="<?= e(url('/admin/payslip/pay')) ?>"
+                  data-confirm="Mark this payslip as unpaid again?">
+                <?= csrf_field() ?>
+                <input type="hidden" name="id" value="<?= (int)$id ?>">
+                <input type="hidden" name="action" value="unpaid">
+                <button class="btn btn-secondary" type="submit">Mark as unpaid</button>
+            </form>
+        <?php else: ?>
+            <p>Record how and when <?= e($name) ?> was paid <?= e(money($slip['net_pay'])) ?>.</p>
+            <form method="post" action="<?= e(url('/admin/payslip/pay')) ?>" data-validate novalidate>
+                <?= csrf_field() ?>
+                <input type="hidden" name="id" value="<?= (int)$id ?>">
+                <input type="hidden" name="action" value="paid">
+
+                <div class="form-grid">
+                    <?php
+                    select_field('method', 'Paid by', ['' => 'Choose...'] + $methods, '', [], 'required');
+                    field('paid_on', 'Date paid', date('Y-m-d'), [], 'date', 'required max="' . date('Y-m-d') . '"');
+                    ?>
+                </div>
+                <button class="btn" type="submit">Mark as paid</button>
+            </form>
+        <?php endif; ?>
+    </section>
+<?php endif; ?>
 <?php admin_footer(); ?>
