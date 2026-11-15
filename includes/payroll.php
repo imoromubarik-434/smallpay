@@ -1,0 +1,115 @@
+<?php
+declare(strict_types=1);
+
+/** "3500.00" -> 350000 (whole cents, no floating point). */
+function to_cents(string $amount): int
+{
+    $parts = explode('.', trim($amount));
+    $whole = (int)$parts[0];
+    $frac  = (int)str_pad(substr($parts[1] ?? '', 0, 2), 2, '0');
+
+    return $whole * 100 + $frac;
+}
+
+/** 350000 -> "3500.00" */
+function from_cents(int $cents): string
+{
+    return sprintf('%d.%02d', intdiv($cents, 100), $cents % 100);
+}
+
+/** Integer division that rounds half up (for amounts that are not negative). */
+function div_round(int $number, int $divisor): int
+{
+    return intdiv($number + intdiv($divisor, 2), $divisor);
+}
+
+/** Does this rule apply to this employee? */
+function rule_applies(array $rule, array $assigned, int $employeeId): bool
+{
+    return truthy($rule['applies_to_all']) || isset($assigned[(int)$rule['id']][$employeeId]);
+}
+
+/** Amount of one rule in cents. $base is the pay the percentage is taken from. */
+function rule_amount(array $rule, int $base): int
+{
+    $value = to_cents((string)$rule['value']);   // 5.50 becomes 550 (hundredths of a percent)
+
+    return $rule['method'] === 'fixed' ? $value : div_round($base * $value, 10000);
+}
+
+/**
+ * Work out one payslip. Returns an array with basic, allowances, gross, deductions,
+ * net (all in cents) and items, or ['error' => 'message'] when it cannot be calculated.
+ */
+function calculate_payslip(array $slip, array $rules, array $assigned, int $year, int $month): array
+{
+    $name = $slip['first_name'] . ' ' . $slip['last_name'];
+    $rate = to_cents((string)$slip['rate']);
+
+    // ---- 1. Basic pay ----
+    if ($slip['pay_type'] === 'monthly') {
+        $basic       = $rate;
+        $monthStart  = new DateTime(sprintf('%04d-%02d-01', $year, $month));
+        $daysInMonth = (int)$monthStart->format('t');
+        $hired       = new DateTime((string)$slip['hire_date']);
+
+        if ($hired > $monthStart) {   // joined during the month: pay for the days employed
+            $daysEmployed = $daysInMonth - (int)$hired->format('j') + 1;
+            $basic        = div_round($rate * $daysEmployed, $daysInMonth);
+        }
+    } else {
+        if ($slip['units_worked'] === null) {
+            $what = $slip['pay_type'] === 'daily' ? 'days' : 'hours';
+            return ['error' => $name . ': enter the ' . $what . ' worked.'];
+        }
+        $basic = div_round($rate * to_cents((string)$slip['units_worked']), 100);
+    }
+
+    $items = [];
+
+    // ---- 2. Allowances (percentages are always of basic pay) ----
+    $allowances = 0;
+    foreach ($rules as $rule) {
+        if ($rule['rule_type'] !== 'allowance' || !rule_applies($rule, $assigned, (int)$slip['employee_id'])) {
+            continue;
+        }
+        $amount = rule_amount($rule, $basic);
+        if ($amount > 0) {
+            $items[]     = ['rule_id' => (int)$rule['id'], 'label' => $rule['name'], 'type' => 'allowance', 'amount' => $amount];
+            $allowances += $amount;
+        }
+    }
+
+    // ---- 3. Gross pay ----
+    $gross = $basic + $allowances;
+
+    // ---- 4. Deductions (percentages of basic or of gross) ----
+    $deductions = 0;
+    foreach ($rules as $rule) {
+        if ($rule['rule_type'] !== 'deduction' || !rule_applies($rule, $assigned, (int)$slip['employee_id'])) {
+            continue;
+        }
+        $base   = $rule['percentage_base'] === 'gross' ? $gross : $basic;
+        $amount = rule_amount($rule, $base);
+        if ($amount > 0) {
+            $items[]     = ['rule_id' => (int)$rule['id'], 'label' => $rule['name'], 'type' => 'deduction', 'amount' => $amount];
+            $deductions += $amount;
+        }
+    }
+
+    // ---- 5. Net pay (advance repayments are added here in a later step) ----
+    $net = $gross - $deductions;
+    if ($net < 0) {
+        return ['error' => $name . ': deductions (' . from_cents($deductions)
+            . ') are more than gross pay (' . from_cents($gross) . ').'];
+    }
+
+    return [
+        'basic'      => $basic,
+        'allowances' => $allowances,
+        'gross'      => $gross,
+        'deductions' => $deductions,
+        'net'        => $net,
+        'items'      => $items,
+    ];
+}
