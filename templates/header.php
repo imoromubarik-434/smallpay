@@ -6,6 +6,9 @@
             <a href="<?= e(url('/')) ?>">Home</a>
             <?php if ($navUser !== null): ?>
                 <a href="<?= e(url(home_for_role($navUser['role']))) ?>">Dashboard</a>
+                <?php if ($navUser['role'] === 'employee'): ?>
+                    <a href="<?= e(url('/employee/payslips')) ?>">My payslips</a>
+                <?php endif; ?>
                  <a href="<?= e(url('/account/password')) ?>">Password</a>
                 <form method="post" action="<?= e(url('/logout')) ?>" class="inline-form">
                     <?= csrf_field() ?>
