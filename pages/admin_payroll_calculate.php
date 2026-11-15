@@ -45,47 +45,15 @@ try {
     $month = (int)$run['period_month'];
     $label = period_label($year, $month);
 
-    $stmt = $pdo->prepare(
-        'SELECT p.id, p.employee_id, p.pay_type, p.rate, p.units_worked,
-                e.first_name, e.last_name, e.hire_date
-         FROM payslips p
-         JOIN employees e ON e.id = p.employee_id
-         WHERE p.run_id = :run
-         ORDER BY e.employee_number'
-    );
-    $stmt->execute(['run' => $id]);
-    $slips = $stmt->fetchAll();
+    // Work everything out first; write only if every payslip is fine
+    $check = compute_run($pdo, $id, $year, $month);
 
-    if (!$slips) {
+    if ($check['count'] === 0) {
         $fail('This run has no payslips.');
     }
-
-    // Rules that are switched on, and which employees the selective ones cover
-    $rules = $pdo->query(
-        'SELECT id, name, rule_type, method, value, percentage_base, applies_to_all
-         FROM deduction_rules WHERE is_active ORDER BY rule_type, name'
-    )->fetchAll();
-
-    $assigned = [];
-    foreach ($pdo->query('SELECT rule_id, employee_id FROM employee_rules')->fetchAll() as $row) {
-        $assigned[(int)$row['rule_id']][(int)$row['employee_id']] = true;
-    }
-
-    // Work everything out first; write only if every payslip is fine
-    $results  = [];
-    $problems = [];
-    foreach ($slips as $slip) {
-        $result = calculate_payslip($slip, $rules, $assigned, $year, $month);
-        if (isset($result['error'])) {
-            $problems[] = $result['error'];
-        } else {
-            $results[(int)$slip['id']] = $result;
-        }
-    }
-
-    if ($problems) {
-        $shown = array_slice($problems, 0, 5);
-        $more  = count($problems) - count($shown);
+    if ($check['problems']) {
+        $shown = array_slice($check['problems'], 0, 5);
+        $more  = count($check['problems']) - count($shown);
         $fail('Nothing was calculated. ' . implode(' ', $shown) . ($more > 0 ? ' And ' . $more . ' more.' : ''));
     }
 
@@ -98,12 +66,13 @@ try {
     $update = $pdo->prepare(
         'UPDATE payslips
          SET basic_pay = :basic, gross_pay = :gross, total_deductions = :deductions,
-             advance_repayment = 0, net_pay = :net, calculated_at = NOW()
+             advance_repayment = :advance, net_pay = :net, calculated_at = NOW()
          WHERE id = :id'
     );
 
-    $totalNet = 0;
-    foreach ($results as $payslipId => $r) {
+    $totalNet     = 0;
+    $totalAdvance = 0;
+    foreach ($check['results'] as $payslipId => $r) {
         $clear->execute(['id' => $payslipId]);
 
         foreach ($r['items'] as $item) {
@@ -120,10 +89,12 @@ try {
             'basic'      => from_cents($r['basic']),
             'gross'      => from_cents($r['gross']),
             'deductions' => from_cents($r['deductions']),
+            'advance'    => from_cents($r['advance']),
             'net'        => from_cents($r['net']),
             'id'         => $payslipId,
         ]);
-        $totalNet += $r['net'];
+        $totalNet     += $r['net'];
+        $totalAdvance += $r['advance'];
     }
 
     $pdo->commit();
@@ -135,10 +106,11 @@ try {
 }
 
 audit($user['id'], 'payroll_calculated', 'payroll_run', $id, [
-    'period'    => $label,
-    'employees' => count($results),
-    'net_total' => from_cents($totalNet),
+    'period'        => $label,
+    'employees'     => count($check['results']),
+    'net_total'     => from_cents($totalNet),
+    'advance_total' => from_cents($totalAdvance),
 ]);
-flash('success', 'Payroll for ' . $label . ' was calculated for ' . count($results)
-    . ' employee' . (count($results) === 1 ? '' : 's') . '. Net total: ' . money(from_cents($totalNet)) . '.');
+flash('success', 'Payroll for ' . $label . ' was calculated for ' . count($check['results'])
+    . ' employee' . (count($check['results']) === 1 ? '' : 's') . '. Net total: ' . money(from_cents($totalNet)) . '.');
 redirect($back);
