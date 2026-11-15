@@ -1,6 +1,8 @@
 <?php
 $user = require_role('admin');
 
+require_once ROOT . '/includes/payroll.php';
+
 $id = filter_var($_GET['id'] ?? '', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
 if ($id === false) {
     not_found();
@@ -18,7 +20,8 @@ $label       = period_label((int)$run['period_year'], (int)$run['period_month'])
 $daysInMonth = (int)(new DateTime(sprintf('%04d-%02d-01', $run['period_year'], $run['period_month'])))->format('t');
 
 $stmt = db()->prepare(
-    'SELECT p.id, p.pay_type, p.rate, p.units_worked,
+    'SELECT p.id, p.pay_type, p.rate, p.units_worked, p.basic_pay, p.gross_pay,
+            p.total_deductions, p.net_pay, p.calculated_at,
             e.employee_number, e.first_name, e.last_name
      FROM payslips p
      JOIN employees e ON e.id = p.employee_id
@@ -77,9 +80,10 @@ if ($isDraft && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->beginTransaction();
 
         try {
-            // The run must still be a draft at the moment of saving
+            // The run must still be a draft at the moment of saving.
+            // Saving hours means the run needs calculating again.
             $stmt = $pdo->prepare(
-                "UPDATE payslips SET units_worked = :units
+                "UPDATE payslips SET units_worked = :units, calculated_at = NULL
                  WHERE id = :id AND run_id = :run
                    AND EXISTS (SELECT 1 FROM payroll_runs r
                                WHERE r.id = payslips.run_id AND r.status = 'draft')"
@@ -96,14 +100,16 @@ if ($isDraft && $_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         audit($user['id'], 'payroll_hours_saved', 'payroll_run', $id, ['period' => $label]);
-        flash('success', 'Hours saved for ' . $label . '.');
+        flash('success', 'Hours saved for ' . $label . '. Calculate the payroll again to update the amounts.');
         redirect('/admin/payroll/run?id=' . $id);
     }
 }
 
-// Progress: how many daily/hourly employees have hours entered
+// Progress figures
 $need = 0;
 $have = 0;
+$calculated = 0;
+$totalNet = 0;
 foreach ($slips as $s) {
     if ($s['pay_type'] !== 'monthly') {
         $need++;
@@ -111,7 +117,12 @@ foreach ($slips as $s) {
             $have++;
         }
     }
+    if ($s['calculated_at'] !== null) {
+        $calculated++;
+        $totalNet += to_cents((string)$s['net_pay']);
+    }
 }
+$allCalculated = $slips && $calculated === count($slips);
 
 admin_header('Payroll ' . $label, 'payroll');
 ?>
@@ -130,11 +141,19 @@ admin_header('Payroll ' . $label, 'payroll');
 
 <?php if ($isDraft): ?>
     <p class="hint">
-        Enter the days worked (daily pay) or hours worked (hourly pay) for <?= $label ?>.
-        Monthly salaries need nothing. Hours entered: <strong><?= $have ?> of <?= $need ?></strong>.
-        The month has <?= $daysInMonth ?> days.
+        Enter the days worked (daily pay) or hours worked (hourly pay) for <?= e($label) ?>, and
+        click <strong>Save hours</strong>. Monthly salaries need nothing. Hours entered:
+        <strong><?= $have ?> of <?= $need ?></strong>. The month has <?= $daysInMonth ?> days.
+        Then click <strong>Calculate</strong>.
     </p>
 <?php endif; ?>
+
+<p class="hint">
+    Calculated: <strong><?= $calculated ?> of <?= count($slips) ?></strong>
+    <?php if ($allCalculated): ?>
+        &middot; Total net pay: <strong><?= e(money(from_cents($totalNet))) ?></strong>
+    <?php endif; ?>
+</p>
 
 <form method="post" action="<?= e(url('/admin/payroll/run') . '?id=' . $id) ?>" data-validate novalidate>
     <?= csrf_field() ?>
@@ -142,7 +161,11 @@ admin_header('Payroll ' . $label, 'payroll');
     <div class="table-wrap">
         <table class="table">
             <thead>
-                <tr><th>No.</th><th>Name</th><th>Pay type</th><th>Rate</th><th>Worked</th></tr>
+                <tr>
+                    <th>No.</th><th>Name</th><th>Pay type</th><th class="num">Rate</th><th>Worked</th>
+                    <th class="num">Basic</th><th class="num">Gross</th>
+                    <th class="num">Deductions</th><th class="num">Net</th>
+                </tr>
             </thead>
             <tbody>
                 <?php foreach ($slips as $s): ?>
@@ -150,15 +173,16 @@ admin_header('Payroll ' . $label, 'payroll');
                     $sid  = (int)$s['id'];
                     $name = $s['first_name'] . ' ' . $s['last_name'];
                     $unit = $s['pay_type'] === 'daily' ? 'days' : 'hours';
+                    $calc = $s['calculated_at'] !== null;
                     ?>
                     <tr>
                         <td><?= e($s['employee_number']) ?></td>
                         <td><?= e($name) ?></td>
                         <td><?= e(ucfirst($s['pay_type'])) ?></td>
-                        <td><?= e(money($s['rate'])) ?></td>
+                        <td class="num"><?= e(money($s['rate'])) ?></td>
                         <td>
                             <?php if ($s['pay_type'] === 'monthly'): ?>
-                                <span class="muted">Monthly salary: no hours needed</span>
+                                <span class="muted">No hours needed</span>
                             <?php elseif ($isDraft): ?>
                                 <div class="form-group">
                                     <div class="units-cell">
@@ -176,6 +200,10 @@ admin_header('Payroll ' . $label, 'payroll');
                                 <?= $s['units_worked'] === null ? '-' : e(rtrim(rtrim($s['units_worked'], '0'), '.') . ' ' . $unit) ?>
                             <?php endif; ?>
                         </td>
+                        <td class="num"><?= $calc ? e(money($s['basic_pay'])) : '-' ?></td>
+                        <td class="num"><?= $calc ? e(money($s['gross_pay'])) : '-' ?></td>
+                        <td class="num"><?= $calc ? e(money($s['total_deductions'])) : '-' ?></td>
+                        <td class="num"><strong><?= $calc ? e(money($s['net_pay'])) : '-' ?></strong></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -184,12 +212,26 @@ admin_header('Payroll ' . $label, 'payroll');
 
     <?php if ($isDraft): ?>
         <div class="form-actions">
-            <button class="btn" type="submit">Save hours</button>
+            <button class="btn btn-secondary" type="submit">Save hours</button>
         </div>
     <?php endif; ?>
 </form>
 
 <?php if ($isDraft): ?>
+    <section class="card status-box">
+        <h2>Calculate</h2>
+        <p>
+            Works out basic pay, allowances, deductions and net pay for every employee using your
+            pay rules. Save any typed hours first. You can calculate as many times as you like
+            before finalizing.
+        </p>
+        <form method="post" action="<?= e(url('/admin/payroll/calculate')) ?>">
+            <?= csrf_field() ?>
+            <input type="hidden" name="id" value="<?= (int)$id ?>">
+            <button class="btn" type="submit">Calculate payroll</button>
+        </form>
+    </section>
+
     <section class="card status-box">
         <h2>Discard this draft</h2>
         <p>
