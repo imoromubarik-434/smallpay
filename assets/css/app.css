@@ -282,3 +282,16 @@ input.units-input { width: 7rem; }
     .card { border: 0; padding: 0; }
     .payslip { max-width: none; }
 }
+
+textarea {
+    width: 100%;
+    padding: 0.65rem 0.8rem;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--radius);
+    font: inherit;
+    resize: vertical;
+}
+textarea[aria-invalid="true"] { border-color: #b91c1c; }
+
+.decision-form { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.decision-form input { width: 8rem; }
