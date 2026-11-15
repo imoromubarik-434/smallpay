@@ -232,3 +232,4 @@ legend { font-weight: 600; padding: 0; margin-bottom: 0.35rem; }
 }
 
 .row-actions { display: flex; align-items: center; gap: 1rem; }
+.chip-amber { background: #fef3c7; color: #92400e; }
