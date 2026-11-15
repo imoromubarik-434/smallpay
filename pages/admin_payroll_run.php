@@ -21,7 +21,7 @@ $daysInMonth = (int)(new DateTime(sprintf('%04d-%02d-01', $run['period_year'], $
 
 $stmt = db()->prepare(
     'SELECT p.id, p.pay_type, p.rate, p.units_worked, p.basic_pay, p.gross_pay,
-            p.total_deductions, p.net_pay, p.calculated_at,
+            p.total_deductions, p.net_pay, p.calculated_at, p.payment_status,
             e.employee_number, e.first_name, e.last_name
      FROM payslips p
      JOIN employees e ON e.id = p.employee_id
@@ -164,7 +164,7 @@ admin_header('Payroll ' . $label, 'payroll');
                 <tr>
                     <th>No.</th><th>Name</th><th>Pay type</th><th class="num">Rate</th><th>Worked</th>
                     <th class="num">Basic</th><th class="num">Gross</th>
-                    <th class="num">Deductions</th><th class="num">Net</th><th>Payslip</th>
+                    <th class="num">Deductions</th><th class="num">Net</th><th>Payment</th><th>Payslip</th>
                 </tr>
             </thead>
             <tbody>
@@ -204,6 +204,15 @@ admin_header('Payroll ' . $label, 'payroll');
                         <td class="num"><?= $calc ? e(money($s['gross_pay'])) : '-' ?></td>
                         <td class="num"><?= $calc ? e(money($s['total_deductions'])) : '-' ?></td>
                         <td class="num"><strong><?= $calc ? e(money($s['net_pay'])) : '-' ?></strong></td>
+                        <td>
+                            <?php if (!$isDraft): ?>
+                                <span class="chip <?= $s['payment_status'] === 'paid' ? 'chip-green' : 'chip-amber' ?>">
+                                    <?= $s['payment_status'] === 'paid' ? 'Paid' : 'Unpaid' ?>
+                                </span>
+                            <?php else: ?>
+                                <span class="muted">-</span>
+                            <?php endif; ?>
+                        </td>
                          <td>
                             <?php if ($calc): ?>
                                 <a href="<?= e(url('/admin/payslip') . '?id=' . $sid) ?>"
