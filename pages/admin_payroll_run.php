@@ -233,6 +233,25 @@ admin_header('Payroll ' . $label, 'payroll');
     </section>
 
     <section class="card status-box">
+        <h2>Finalize</h2>
+        <?php if ($allCalculated): ?>
+            <p>
+                Locks this payroll: the amounts can no longer be changed, and the payslips become final.
+                Total net pay: <strong><?= e(money(from_cents($totalNet))) ?></strong>.
+                Check the amounts above before you continue.
+            </p>
+            <form method="post" action="<?= e(url('/admin/payroll/finalize')) ?>"
+                  data-confirm="Finalize payroll for <?= e($label) ?>? This cannot be undone.">
+                <?= csrf_field() ?>
+                <input type="hidden" name="id" value="<?= (int)$id ?>">
+                <button class="btn" type="submit">Finalize payroll</button>
+            </form>
+        <?php else: ?>
+            <p>Finalizing becomes available once every payslip has been calculated.</p>
+        <?php endif; ?>
+    </section>
+
+    <section class="card status-box">
         <h2>Discard this draft</h2>
         <p>
             Removes the draft and its payslips so you can start the month again.
