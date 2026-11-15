@@ -39,10 +39,17 @@ function rule_amount(array $rule, int $base): int
 
 /**
  * Work out one payslip. Returns an array with basic, allowances, gross, deductions,
- * net (all in cents) and items, or ['error' => 'message'] when it cannot be calculated.
+ * advance, net (all in cents), advance_id and items, or ['error' => 'message'].
+ * $advance is the employee's approved advance (id, installment, balance in cents) or null.
  */
-function calculate_payslip(array $slip, array $rules, array $assigned, int $year, int $month): array
-{
+function calculate_payslip(
+    array $slip,
+    array $rules,
+    array $assigned,
+    int $year,
+    int $month,
+    ?array $advance = null
+): array {
     $name = $slip['first_name'] . ' ' . $slip['last_name'];
     $rate = to_cents((string)$slip['rate']);
 
@@ -97,24 +104,38 @@ function calculate_payslip(array $slip, array $rules, array $assigned, int $year
         }
     }
 
-    // ---- 5. Net pay (advance repayments are added here in a later step) ----
-    $net = $gross - $deductions;
-    if ($net < 0) {
+    $beforeAdvance = $gross - $deductions;
+    if ($beforeAdvance < 0) {
         return ['error' => $name . ': deductions (' . from_cents($deductions)
             . ') are more than gross pay (' . from_cents($gross) . ').'];
     }
 
+    // ---- 5. Advance repayment: the smallest of installment, balance and what is affordable ----
+    $repay     = 0;
+    $advanceId = null;
+    if ($advance !== null) {
+        $repay = min($advance['installment'], $advance['balance'], $beforeAdvance);
+        if ($repay > 0) {
+            $advanceId = $advance['id'];
+        } else {
+            $repay = 0;
+        }
+    }
+
+    // ---- 6. Net pay ----
     return [
         'basic'      => $basic,
         'allowances' => $allowances,
         'gross'      => $gross,
         'deductions' => $deductions,
-        'net'        => $net,
+        'advance'    => $repay,
+        'advance_id' => $advanceId,
+        'net'        => $beforeAdvance - $repay,
         'items'      => $items,
     ];
 }
 
-/** Calculate every payslip of a run with the rules as they are right now. */
+/** Calculate every payslip of a run with the rules and advances as they are right now. */
 function compute_run(PDO $pdo, int $runId, int $year, int $month): array
 {
     $stmt = $pdo->prepare(
@@ -138,10 +159,29 @@ function compute_run(PDO $pdo, int $runId, int $year, int $month): array
         $assigned[(int)$row['rule_id']][(int)$row['employee_id']] = true;
     }
 
+    // Approved advances still being repaid (balance comes from the advance_balances view)
+    $advances = [];
+    $rows = $pdo->query(
+        "SELECT a.id, a.employee_id, a.installment_amount, b.balance
+         FROM advances a
+         JOIN advance_balances b ON b.advance_id = a.id
+         WHERE a.status = 'approved'"
+    )->fetchAll();
+    foreach ($rows as $row) {
+        $advances[(int)$row['employee_id']] = [
+            'id'          => (int)$row['id'],
+            'installment' => to_cents((string)$row['installment_amount']),
+            'balance'     => to_cents((string)$row['balance']),
+        ];
+    }
+
     $results  = [];
     $problems = [];
     foreach ($slips as $slip) {
-        $r = calculate_payslip($slip, $rules, $assigned, $year, $month);
+        $r = calculate_payslip(
+            $slip, $rules, $assigned, $year, $month,
+            $advances[(int)$slip['employee_id']] ?? null
+        );
         if (isset($r['error'])) {
             $problems[] = $r['error'];
         } else {
