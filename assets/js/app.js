@@ -14,6 +14,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (input.type !== 'radio' || input.checked) {
                     current = input.value;
                 }
+
+         // Print button: <button data-print>
+        document.querySelectorAll('[data-print]').forEach((button) => {
+            button.addEventListener('click', () => window.print());
+    });
             });
             box.hidden = current !== value;
         };
