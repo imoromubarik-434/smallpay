@@ -251,3 +251,4 @@ legend { font-weight: 600; padding: 0; margin-bottom: 0.35rem; }
 input.units-input { width: 7rem; }
 .table .form-group { margin: 0; }
 .table .field-error { min-height: 0; }
+.num { text-align: right !important; font-variant-numeric: tabular-nums; }
