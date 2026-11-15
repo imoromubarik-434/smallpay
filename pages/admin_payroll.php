@@ -50,19 +50,26 @@ admin_header('Payroll runs', 'payroll');
     <div class="table-wrap">
         <table class="table">
             <thead>
-                <tr><th>Period</th><th>Employees</th><th>Net total</th><th>Status</th></tr>
+                <tr><th>Period</th><th>Employees</th><th>Net total</th><th>Status</th><th>Actions</th></tr>
             </thead>
             <tbody>
                 <?php foreach ($runs as $run): ?>
                     <?php $final = $run['status'] === 'finalized'; ?>
+                    <?php $runLabel = period_label((int)$run['period_year'], (int)$run['period_month']); ?>
                     <tr>
-                        <td><?= e(period_label((int)$run['period_year'], (int)$run['period_month'])) ?></td>
+                        <td><?= e($runLabel) ?></td>
                         <td><?= (int)$run['staff'] ?></td>
                         <td><?= $final ? e(money($run['net_total'])) : 'Not calculated' ?></td>
                         <td>
                             <span class="chip <?= $final ? 'chip-green' : 'chip-amber' ?>">
                                 <?= $final ? 'Finalized' : 'Draft' ?>
                             </span>
+                        </td>
+                        <td>
+                            <a href="<?= e(url('/admin/payroll/run') . '?id=' . (int)$run['id']) ?>"
+                               aria-label="<?= $final ? 'View' : 'Review' ?> payroll for <?= e($runLabel) ?>">
+                                <?= $final ? 'View' : 'Review' ?>
+                            </a>
                         </td>
                     </tr>
                 <?php endforeach; ?>
