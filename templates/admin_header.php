@@ -13,7 +13,7 @@ require __DIR__ . '/head.php';
 ?>
 <div class="admin-shell">
     <aside class="admin-sidebar">
-        <a class="admin-brand" href="<?= e(url('/admin')) ?>">SmallPay</a>
+        <a class="admin-brand" href="<?= e(url('/admin')) ?>">smallpay<span>.</span></a>
         <nav class="admin-nav" aria-label="Admin">
             <?php foreach ($items as [$key, $label, $path, $ready]): ?>
                 <?php if ($ready): ?>
