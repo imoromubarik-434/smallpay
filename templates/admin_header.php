@@ -1,11 +1,11 @@
 <?php
 $items = [
-    ['dashboard', 'Dashboard',    '/admin',           true],
-    ['employees', 'Employees',    '/admin/employees', true],
-    ['rules',     'Pay rules',    '/admin/rules',     true],
-    ['payroll',   'Payroll runs', '/admin/payroll',   true],
-    ['advances',  'Advances',     '/admin/advances',  true],
-    ['reports',   'Reports',      '/admin/reports',   true],
+    ['dashboard', 'Dashboard',       '/admin',            true],
+    ['employees', 'Employees',       '/admin/employees',  true],
+    ['rules',     'Pay rules',       '/admin/rules',      true],
+    ['payroll',   'Payroll runs',    '/admin/payroll',    true],
+    ['advances',  'Advances',        '/admin/advances',   true],
+    ['reports',   'Reports',         '/admin/reports',    true],
     ['password',  'Change password', '/account/password', true],
 ];
 
@@ -13,7 +13,15 @@ require __DIR__ . '/head.php';
 ?>
 <div class="admin-shell">
     <aside class="admin-sidebar">
-        <a class="admin-brand" href="<?= e(url('/admin')) ?>">smallpay<span>.</span></a>
+        <input type="checkbox" id="admin-nav-toggle" class="nav-check" aria-label="Open the menu">
+
+        <div class="admin-bar">
+            <a class="admin-brand" href="<?= e(url('/admin')) ?>">smallpay<span>.</span></a>
+            <label for="admin-nav-toggle" class="admin-menu-btn">
+                <span class="t-open">Menu</span><span class="t-close">Close</span>
+            </label>
+        </div>
+
         <nav class="admin-nav" aria-label="Admin">
             <?php foreach ($items as [$key, $label, $path, $ready]): ?>
                 <?php if ($ready): ?>
