@@ -48,6 +48,7 @@ $routes = [
     '/employee/advances'     => 'employee_advances',
     '/admin/advances'        => 'admin_advances',
     '/admin/advances/decide' => 'admin_advance_decide',
+    '/employee/profile' => 'employee_profile',
 ];
 
 // Work out which page was requested
