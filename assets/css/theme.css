@@ -179,16 +179,6 @@ input[type="number"], input.units-input { font-family: var(--mono); }
     .site-nav form .nav-link { width: 100%; border-bottom: 0; }
     .site-nav .nav-cta, .site-nav .nav-cta:hover { justify-content: center; margin: 10px 0; border-bottom: 0; }
 
-    /* Admin sidebar becomes a scrolling bar across the top */
-    .admin-sidebar { flex: 1 1 100%; padding: 12px; }
-    .admin-brand { padding: 0 8px 8px; }
-    .admin-nav { flex-direction: row; gap: 6px; overflow-x: auto; padding-bottom: 6px; }
-    .admin-nav a, .admin-nav .nav-disabled, .admin-nav .link-button { flex: none; white-space: nowrap; }
-    .admin-nav form { flex: none; }
-    .admin-nav .link-button { width: auto; margin: 0; }
-    .admin-main { flex-basis: 100%; padding: 1rem; }
-}
-
 @media (max-width: 480px) {
     .card, .bar-wrap { padding: 1rem; }
     .page-head { align-items: flex-start; }
