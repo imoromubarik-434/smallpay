@@ -12,15 +12,30 @@ require ROOT . '/includes/auth.php';
 // Folder the app lives in: empty on Vercel, "/smallpay" on XAMPP
 define('BASE_PATH', rtrim(env('APP_BASE_PATH'), '/'));
 
-// Basic security headers
+// Never show PHP warnings or errors to visitors (they are still written to the logs)
+ini_set('display_errors', env('APP_DEBUG') === '1' ? '1' : '0');
+error_reporting(E_ALL);
+
+// Security headers
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
 header('Referrer-Policy: strict-origin-when-cross-origin');
+header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
+header(
+    "Content-Security-Policy: default-src 'self'; img-src 'self' data:; "
+    . "style-src 'self'; script-src 'self'; base-uri 'self'; "
+    . "form-action 'self'; frame-ancestors 'none'"
+);
+
+$onHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
+if ($onHttps) {
+    header('Strict-Transport-Security: max-age=15552000');   // browsers must use HTTPS
+}
 
 // Whitelist: only these pages can ever be loaded
 $routes = [
     '/'         => 'home',
-    '/health'   => 'health',
     '/login'    => 'login',
     '/logout'   => 'logout',
     '/admin'    => 'admin/dashboard',
