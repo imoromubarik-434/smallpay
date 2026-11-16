@@ -23,8 +23,8 @@ header('Referrer-Policy: strict-origin-when-cross-origin');
 header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
 header(
     "Content-Security-Policy: default-src 'self'; img-src 'self' data:; "
-    . "style-src 'self'; script-src 'self'; base-uri 'self'; "
-    . "form-action 'self'; frame-ancestors 'none'"
+    . "style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; "
+    . "script-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
 );
 
 $onHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
