@@ -1,7 +1,9 @@
 </main>
 
-<footer class="l-footer">
-    <div class="l-wrap">&copy; <?= e(date('Y')) ?> SmallPay &middot; End-of-semester project</div>
+<footer class="site-footer">
+    <div class="container">
+        <p>&copy; <?= e(date('Y')) ?> SmallPay. End-of-semester project.</p>
+    </div>
 </footer>
 </body>
 </html>
