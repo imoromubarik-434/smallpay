@@ -45,7 +45,7 @@ try {
     $month = (int)$run['period_month'];
     $label = period_label($year, $month);
 
-    // Recalculate with today's rules, to compare with what was saved
+    // Recalculate with today's rules and advances, to compare with what was saved
     $check = compute_run($pdo, $id, $year, $month);
 
     if ($check['count'] === 0) {
@@ -56,7 +56,7 @@ try {
     }
 
     $stmt = $pdo->prepare(
-        'SELECT id, basic_pay, gross_pay, total_deductions, net_pay, calculated_at
+        'SELECT id, basic_pay, gross_pay, total_deductions, advance_repayment, net_pay, calculated_at
          FROM payslips WHERE run_id = :run'
     );
     $stmt->execute(['run' => $id]);
@@ -74,10 +74,11 @@ try {
         $now = $check['results'][(int)$row['id']] ?? null;
         if (
             $now === null
-            || to_cents((string)$row['basic_pay'])        !== $now['basic']
-            || to_cents((string)$row['gross_pay'])        !== $now['gross']
-            || to_cents((string)$row['total_deductions']) !== $now['deductions']
-            || to_cents((string)$row['net_pay'])          !== $now['net']
+            || to_cents((string)$row['basic_pay'])         !== $now['basic']
+            || to_cents((string)$row['gross_pay'])         !== $now['gross']
+            || to_cents((string)$row['total_deductions'])  !== $now['deductions']
+            || to_cents((string)$row['advance_repayment']) !== $now['advance']
+            || to_cents((string)$row['net_pay'])           !== $now['net']
         ) {
             $changed++;
         }
@@ -89,8 +90,35 @@ try {
             . ($notCalculated === 1 ? ' has' : 's have') . ' not been calculated yet.');
     }
     if ($changed > 0) {
-        $fail('Pay rules or hire dates have changed since you calculated, so the amounts on screen are '
-            . 'out of date. Calculate again, check the amounts, then finalize.');
+        $fail('Pay rules, advances or hire dates have changed since you calculated, so the amounts on screen '
+            . 'are out of date. Calculate again, check the amounts, then finalize.');
+    }
+
+    // ---- Record advance repayments; close advances whose balance reaches zero ----
+    $record = $pdo->prepare(
+        'INSERT INTO advance_repayments (advance_id, payslip_id, amount)
+         VALUES (:advance, :payslip, :amount)'
+    );
+    $close = $pdo->prepare(
+        "UPDATE advances a SET status = 'repaid'
+         FROM advance_balances b
+         WHERE b.advance_id = a.id AND a.id = :id AND a.status = 'approved' AND b.balance <= 0"
+    );
+
+    $repayments = 0;
+    $closed     = 0;
+    foreach ($check['results'] as $payslipId => $r) {
+        if ($r['advance_id'] !== null && $r['advance'] > 0) {
+            $record->execute([
+                'advance' => $r['advance_id'],
+                'payslip' => $payslipId,
+                'amount'  => from_cents($r['advance']),
+            ]);
+            $repayments++;
+
+            $close->execute(['id' => $r['advance_id']]);
+            $closed += $close->rowCount();
+        }
     }
 
     $stmt = $pdo->prepare(
@@ -108,10 +136,19 @@ try {
 }
 
 audit($user['id'], 'payroll_finalized', 'payroll_run', $id, [
-    'period'    => $label,
-    'employees' => $check['count'],
-    'net_total' => from_cents($totalNet),
+    'period'      => $label,
+    'employees'   => $check['count'],
+    'net_total'   => from_cents($totalNet),
+    'repayments'  => $repayments,
+    'fully_repaid' => $closed,
 ]);
-flash('success', 'Payroll for ' . $label . ' is finalized and locked. Net total: '
-    . money(from_cents($totalNet)) . '.');
+
+$message = 'Payroll for ' . $label . ' is finalized and locked. Net total: ' . money(from_cents($totalNet)) . '.';
+if ($repayments > 0) {
+    $message .= ' ' . $repayments . ' advance repayment' . ($repayments === 1 ? ' was' : 's were') . ' recorded.';
+}
+if ($closed > 0) {
+    $message .= ' ' . $closed . ' advance' . ($closed === 1 ? ' is' : 's are') . ' now fully repaid.';
+}
+flash('success', $message);
 redirect($back);
