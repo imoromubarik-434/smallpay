@@ -295,3 +295,4 @@ textarea[aria-invalid="true"] { border-color: #b91c1c; }
 
 .decision-form { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
 .decision-form input { width: 8rem; }
+.table tfoot td { font-weight: 700; border-top: 2px solid var(--border); background: #f8fafc; }
