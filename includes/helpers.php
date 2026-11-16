@@ -179,3 +179,15 @@ function period_label(int $year, int $month): string
     $date = DateTime::createFromFormat('!Y-n', $year . '-' . $month);
     return $date ? $date->format('F Y') : $year . '-' . $month;
 }
+
+/** Print the top of the landing page (its own header, fonts and styles). */
+function landing_header(string $pageTitle): void
+{
+    require ROOT . '/templates/landing_head.php';
+}
+
+/** Print the bottom of the landing page. */
+function landing_footer(): void
+{
+    require ROOT . '/templates/landing_footer.php';
+}
