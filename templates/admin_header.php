@@ -5,7 +5,7 @@ $items = [
     ['rules',     'Pay rules',    '/admin/rules',     true],
     ['payroll',   'Payroll runs', '/admin/payroll',   true],
     ['advances',  'Advances',     '/admin/advances',  true],
-    ['reports',   'Reports',      '/admin/reports',   false],
+    ['reports',   'Reports',      '/admin/reports',   true],
     ['password',  'Change password', '/account/password', true],
 ];
 
