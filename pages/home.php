@@ -7,7 +7,7 @@ $cta     = $visitor
 
 landing_header('Payroll for small businesses');
 ?>
-<section class="hero l-wrap">
+<section class="hero l-wrap"> 
     <div class="hero-copy">
         <p class="eyebrow">Payroll for small shops, salons and workshops</p>
         <h1>
@@ -122,7 +122,7 @@ landing_header('Payroll for small businesses');
                 <div class="r-line" data-row="advance"><span>Advance repayment</span><i></i><span data-out="advance">−100.00</span></div>
                 <hr class="r-rule">
                 <div class="r-gross"><span>Gross pay</span><span data-out="gross">1,910.00</span></div>
-                <div class="r-net"><span>NET PAY</span><mark data-out="net">1,549.20</mark></div>
+                <div class="r-net"><span>NET PAY</span><mark data-out="net">1,569.20</mark></div>
             </div>
             <div class="r-edge" aria-hidden="true"></div>
         </div>
