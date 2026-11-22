@@ -16,7 +16,7 @@
     background: var(--ink);
 }
 .admin-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.admin-brand { display: block; padding: 0 0.75rem 1.5rem; }
+.admin-brand { display: inline-flex; padding: 0 0.75rem 1.5rem; }
 .admin-menu-btn { display: none; }
 .admin-menu-btn .t-close { display: none; }
 
@@ -63,6 +63,7 @@
         padding: 10px 16px;
     }
     .admin-brand { padding: 0; }
+    .admin-brand .brand-tag { display: none; }
 
     .admin-menu-btn {
         display: inline-flex;
