@@ -16,7 +16,7 @@ require __DIR__ . '/head.php';
         <input type="checkbox" id="admin-nav-toggle" class="nav-check" aria-label="Open the menu">
 
         <div class="admin-bar">
-            <a class="admin-brand" href="<?= e(url('/admin')) ?>">smallpay<span>.</span></a>
+            <a class="admin-brand brand" href="<?= e(url('/admin')) ?>" aria-label="SmallPay admin home"><?php require __DIR__ . '/logo.php'; ?></a>
             <label for="admin-nav-toggle" class="admin-menu-btn">
                 <span class="t-open">Menu</span><span class="t-close">Close</span>
             </label>
