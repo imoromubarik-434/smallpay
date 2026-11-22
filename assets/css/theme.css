@@ -190,3 +190,23 @@ input[type="number"], input.units-input { font-family: var(--mono); }
 @media print {
     .card, .table-wrap { box-shadow: none !important; }
 }
+
+/* ---------- Logo ---------- */
+.brand, .admin-brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; line-height: 1; }
+.brand .brand-mark { flex: none; width: 42px; height: 44px; }
+.brand .brand-text { display: flex; flex-direction: column; }
+.brand .brand-word { font: 800 28px/1 var(--sans); letter-spacing: -0.04em; }
+.brand .w-small { color: var(--ink); }
+.brand .w-pay { color: var(--verm); }
+.brand .brand-tag {
+    margin-top: 5px; font: 500 9px/1 var(--mono); letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--muted);
+}
+.admin-brand .w-small { color: var(--paper); }
+.admin-brand .brand-tag { color: #a8a091; }
+
+@media (max-width: 480px) {
+    .brand .brand-tag { display: none; }
+    .brand .brand-word { font-size: 24px; }
+    .brand .brand-mark { width: 36px; height: 38px; }
+}
