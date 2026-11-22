@@ -3,7 +3,7 @@
 ?>
 <header class="site-header">
     <div class="container site-bar">
-        <a class="brand" href="<?= e(url('/')) ?>">smallpay<span>.</span></a>
+        <a class="brand" href="<?= e(url('/')) ?>" aria-label="SmallPay home"><?php require __DIR__ . '/logo.php'; ?></a>
 
         <input type="checkbox" id="nav-toggle" class="nav-check" aria-label="Open the menu">
         <label for="nav-toggle" class="nav-btn">Menu</label>
